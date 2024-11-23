@@ -1,0 +1,7 @@
+{
+    "liveshare.allowGuestTaskControl": true,
+    "liveshare.allowGuestDebugControl": true,
+    "liveshare.anonymousGuestApproval": "accept",
+    "liveshare.diagnosticLogging": true,
+    "livePreview.defaultPreviewPath": "/Cryptography.html"
+}

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="Cryptography.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Cryptography</h1>
+    
+    <div class="input-group">
+      <h2>Input Matrix (4x4)</h2>
+      <div id="matrixContainer" class="matrix-container"></div>
+    </div>
+
+    <div class="input-group">
+      <label for="wordToEncode">Word to Encode:</label>
+      <input type="text" id="wordToEncode" placeholder="Enter a word or phrase">
+    </div>
+
+    <div class="output">
+      <h2>Encoded Message</h2>
+      <p id="encodedOutput">Result: <span></span></p>
+    </div>
+
+    <div class="input-group">
+      <label for="numbersToDecode">Numbers to Decode (Comma-Separated):</label>
+      <input type="text" id="numbersToDecode" placeholder="e.g., 12, 25, 36, ...">
+    </div>
+
+    <div class="output">
+      <h2>Decoded Message</h2>
+      <p id="decodedOutput">Result: <span></span></p>
+    </div>
+
+    <div class="output">
+      <h2>Inverse Matrix</h2>
+      <div id="inverseMatrixContainer" class="matrix-container"></div>
+    </div>
+
+    <div class="output">
+      <p id="errorMessage" class="error"></p>
+    </div>
+
+    <div class="button-group">
+      <button type="button" id="encodeBtn">Encode</button>
+      <button type="button" id="decodeBtn">Decode</button>
+    </div>
+  </div>
+
+  <script src="Cryptography.js"></script>
+</body>
+</html>
