@@ -174,5 +174,6 @@ showInverseBtn.addEventListener('click', function () {
         displayInverseMatrix(inverseMatrix);
     } catch (error) {
         errorMessage.textContent = error.message;
+        inverseMatrixContainer = '';
     }
 });
