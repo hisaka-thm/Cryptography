@@ -7,6 +7,7 @@ var numbersToDecodeInput = document.getElementById('numbersToDecode');
 var errorMessage = document.getElementById('errorMessage');
 var encodeBtn = document.getElementById('encodeBtn');
 var decodeBtn = document.getElementById('decodeBtn');
+var showInverseBtn = document.getElementById('showInverseBtn');
 
 // matrix inputs
 (function createMatrixInputs() {
@@ -45,15 +46,15 @@ function invertMatrix(matrix) {
         var pivot = augmented[i][i];
         if (pivot === 0) throw new Error('Matrix is not invertible.');
         for (var j = 0; j < augmented[i].length; j++) {
-            augmented[i][j] /= pivot;
-        }
+            augmented[i][j] /= pivot; // finds the pivot element for each row, if the pivot element is 0, it indicates that the matrix is not invertible
+        } // if the pivot element isn't 0, the function normalize the entire row by dividing the elements in the row by the pivot element, ensuring that the pivot becomes 1
 
         for (var k = 0; k < size; k++) {
-            if (k !== i) {
-                var factor = augmented[k][i];
-                for (var j = 0; j < augmented[k].length; j++) {
-                    augmented[k][j] -= factor * augmented[i][j];
-                }
+            if (k !== i) { 
+                var factor = augmented[k][i]; // for each row 'k', it computes a factor, which is the element in the same column as the pivot.
+                for (var j = 0; j < augmented[k].length; j++) { 
+                    augmented[k][j] -= factor * augmented[i][j]; // subtracts a multiple of pivot row from row 'k' to eliminate the element in the current column making it 0
+                } 
             }
         }
     }
@@ -79,11 +80,11 @@ function displayInverseMatrix(matrix) {
 
 // matrix multiplication
 function multiplyMatrix(matrix, vector) {
-    var result = [];
+    var result = []; // this is the array where the program stores the results after performing the matrix multiplication
     for (let col = 0; col < matrix[0].length; col++) {
         let sum = 0;
-        for (let row = 0; row < matrix.length; row++) {
-            sum += matrix[row][col] * vector[row];
+        for (let row = 0; row < matrix.length; row++) { 
+            sum += matrix[row][col] * vector[row]; // this calculates the dot product of the col-th column of the matrix and the vector. Adds the results of each row in current column
         }
         result.push(manualFixFloatingPoint(sum));
     }
@@ -93,45 +94,44 @@ function multiplyMatrix(matrix, vector) {
 // float point precision
 function manualFixFloatingPoint(value) {
     const multiplier = 1e10; 
-    return Math.floor(value * multiplier + 0.5) / multiplier;
+    return Math.floor(value * multiplier + 0.5) / multiplier; // rounds of the result to a manageable decimal point to handle potential floating-point precision issues
 }
 
 // convert letters to numbers
 function letterToNumber(letter) {
-    if (letter === ' ') return 0;
-    return letter.toLowerCase().charCodeAt(0) - 96;
+    return letter.charCodeAt(0); //different from sir's example. His uses (A-Z) 1-26, this uses (ASCII) 0-255
 }
 
 // convert numbers to letters
 function numberToLetter(num) {
-    return num === 0 ? ' ' : String.fromCharCode(num + 96); 
+    return String.fromCharCode(num % 256);  
 }
 
 // encoding process
 function encodeWord(matrix, word) {
-    var letters = word.split('').map(letterToNumber);
+    var letters = word.split('').map(letterToNumber); // splits the word to individual characters
     var paddedLetters = [...letters, ...Array(4 - (letters.length % 4 || 4)).fill(0)]; // fill missing numbers with 0 e.g [1 2  ] = [1 2 0 0]
-    var encoded = [];
-    for (var i = 0; i < paddedLetters.length; i += 4) {
-        var chunk = paddedLetters.slice(i, i + 4);
-        var encodedChunk = multiplyMatrix(matrix, chunk);
-        encoded.push(encodedChunk);
+    var encoded = []; // this is the array where the program stores the encoded values
+    for (var i = 0; i < paddedLetters.length; i += 4) { //processes 4 numbers at a time
+        var chunk = paddedLetters.slice(i, i + 4); // for each loop a chunk of 4 numbers is taken from encodedValues
+        var encodedChunk = multiplyMatrix(matrix, chunk); // the chunks gets passed to the multiplyMatrix function which multiplies the chunk by the given matrix
+        encoded.push(encodedChunk); // pushes the result to the variable "decodedLetters"
     }
-    return encoded.map(chunk => `[${chunk.join(', ')}]`).join(' ');
+    return encoded.map(chunk => `[${chunk.join(', ')}]`).join(' '); // return the chunks of numbers as a string/whole
 }
 
 // decoding process
 function decodeWord(matrix, encodedValues) {
-    const inverseMatrix = invertMatrix(matrix);
+    const inverseMatrix = invertMatrix(matrix); //calculates the inverse of the matrix and stores it in variable "inverseMatrix"
 
-    const decodedLetters = [];
-    for (let i = 0; i < encodedValues.length; i += 4) {
-        const chunk = encodedValues.slice(i, i + 4);
-        const decodedChunk = multiplyMatrix(inverseMatrix, chunk);
-        decodedLetters.push(...decodedChunk);
+    const decodedLetters = []; // this is the array where the program stores the decoded letters
+    for (let i = 0; i < encodedValues.length; i += 4) { //processes 4 numbers at a time
+        const chunk = encodedValues.slice(i, i + 4); // for each loop a chunk of 4 numbers is taken from encodedValues
+        const decodedChunk = multiplyMatrix(inverseMatrix, chunk); // the chunks gets passed to the multiplyMatrix function which multiplies the chunk by the inverse matrix
+        decodedLetters.push(...decodedChunk); // pushes the result to the variable "decodedLetters"
     }
 
-    return decodedLetters.map(numberToLetter).join('').toUpperCase();
+    return decodedLetters.map(numberToLetter).filter(letter => letter !== '\0').join(''); // converts the result(numbers) to letters
 }
 
 // handle encoding
@@ -160,6 +160,18 @@ decodeBtn.addEventListener('click', function () {
 
         var decoded = decodeWord(matrix, numbers);
         decodedOutput.textContent = decoded;
+    } catch (error) {
+        errorMessage.textContent = error.message;
+    }
+});
+
+showInverseBtn.addEventListener('click', function () {
+    try {
+        errorMessage.textContent = '';
+        var matrix = getMatrix();
+        var inverseMatrix = invertMatrix(matrix);
+
+        displayInverseMatrix(inverseMatrix);
     } catch (error) {
         errorMessage.textContent = error.message;
     }
