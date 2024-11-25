@@ -168,6 +168,7 @@ decodeBtn.addEventListener('click', function () {
 showInverseBtn.addEventListener('click', function () {
     try {
         errorMessage.textContent = '';
+        inverseMatrixContainer.innerHTML = '';
         var matrix = getMatrix();
         var inverseMatrix = invertMatrix(matrix);
 
