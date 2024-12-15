@@ -1,6 +1,7 @@
 var matrixContainer = document.getElementById('matrixContainer');
 var inverseMatrixContainer = document.getElementById('inverseMatrixContainer');
-var encodedOutput = document.getElementById('encodedOutput').querySelector('span');
+var encodedOutputNum = document.getElementById('encodedOutputNum').querySelector('span');
+var encodedOutputLet = document.getElementById('encodedOutputLet').querySelector('span');
 var decodedOutput = document.getElementById('decodedOutput').querySelector('span');
 var wordToEncodeInput = document.getElementById('wordToEncode');
 var numbersToDecodeInput = document.getElementById('numbersToDecode');
@@ -104,7 +105,14 @@ function letterToNumber(letter) {
 
 // convert numbers to letters
 function numberToLetter(num) {
-    return String.fromCharCode(num % 256);  
+    var asciiCode = num % 256;
+    
+    if (asciiCode  < 0)
+    {
+        asciiCode += 256;
+    }
+    console.log(asciiCode);
+    return String.fromCharCode(asciiCode);  
 }
 
 // encoding process
@@ -115,9 +123,23 @@ function encodeWord(matrix, word) {
     for (var i = 0; i < paddedLetters.length; i += 4) { //processes 4 numbers at a time
         var chunk = paddedLetters.slice(i, i + 4); // for each loop a chunk of 4 numbers is taken from encodedValues
         var encodedChunk = multiplyMatrix(matrix, chunk); // the chunks gets passed to the multiplyMatrix function which multiplies the chunk by the given matrix
-        encoded.push(encodedChunk); // pushes the result to the variable "decodedLetters"
+        encoded.push(encodedChunk); // pushes the result to the variable "encoded"
     }
     return encoded.map(chunk => `[${chunk.join(', ')}]`).join(' '); // return the chunks of numbers as a string/whole
+}
+
+function encodeWordLetters(matrix, word) {
+    var letters = word.split('').map(letterToNumber); // splits the word to individual characters
+    var paddedLetters = [...letters, ...Array(4 - (letters.length % 4 || 4)).fill(0)]; // fill missing numbers with 0 e.g [1 2  ] = [1 2 0 0]
+    var encoded = []; // this is the array where the program stores the encoded values
+    
+    for (var i = 0; i < paddedLetters.length; i += 4) { // processes 4 numbers at a time
+        var chunk = paddedLetters.slice(i, i + 4); // for each loop a chunk of 4 numbers is taken from paddedLetters
+        var encodedChunk = multiplyMatrix(matrix, chunk); // the chunk gets passed to the multiplyMatrix function which multiplies the chunk by the given matrix
+        encoded.push(...encodedChunk); // pushes the result to the encoded array
+    }
+    
+    return encoded.map(number => numberToLetter(number)).filter(letter => letter !== '\0').join(', '); 
 }
 
 // decoding process
@@ -144,7 +166,14 @@ encodeBtn.addEventListener('click', function () {
         if (!word) throw new Error('Please enter a word.');
 
         var encoded = encodeWord(matrix, word);
-        encodedOutput.textContent = encoded;
+        var encodedLetters = encodeWordLetters(matrix, word);
+
+        encodedOutputNum.textContent = encoded;
+        encodedOutputLet.textContent = encodedLetters;
+        console.log(encodedOutputLet);
+        console.log(encodedOutputNum);
+
+
     } catch (error) {
         errorMessage.textContent = error.message;
     }
@@ -155,9 +184,21 @@ decodeBtn.addEventListener('click', function () {
     try {
         errorMessage.textContent = '';
         var matrix = getMatrix();
-        var numbers = numbersToDecodeInput.value.split(',').map(Number);
-        if (numbers.some(isNaN)) throw new Error('Enter valid numbers.');
-
+        var input = numbersToDecodeInput.value.trim();
+        var inputArray = input.split(',').map(item => item.trim());
+        var numbers = [];
+        if (isNaN(inputArray[0]))
+        {
+            numbers = inputArray.map(letter => letterToNumber(letter));
+        }
+        else
+        {
+            numbers = inputArray.map(Number);
+        }
+        
+        console.log(numbers);
+        
+        
         var decoded = decodeWord(matrix, numbers);
         decodedOutput.textContent = decoded;
     } catch (error) {
